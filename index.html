@@ -148,6 +148,18 @@ body{
 .mode-card h4{margin:0 0 4px;font-size:17px;}
 .mode-card p{margin:0;font-size:13px;color:var(--ink-soft);}
 
+/* ---------- Word list ---------- */
+.wl-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.wl-row{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.wl-idx{min-width:22px;text-align:center;font-size:12px;font-weight:800;color:var(--ink-soft);}
+.wl-main{flex:1;min-width:0;}
+.wl-word-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.wl-word{font-weight:800;font-size:17px;}
+.wl-pos{font-size:12px;color:var(--basic-dark);background:var(--basic-bg);padding:1px 8px;border-radius:20px;font-weight:700;}
+.level-adv .wl-pos{color:var(--adv-dark);background:var(--adv-bg);}
+.wl-cn{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+.wl-speak{width:36px;height:36px;font-size:15px;flex-shrink:0;}
+
 /* ---------- Flashcard ---------- */
 .fc-progress{text-align:center;color:var(--ink-soft);font-size:13px;margin-bottom:14px;}
 .flashcard-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
@@ -530,6 +542,7 @@ function render(){
     case 'home': html = renderHome(); break;
     case 'units': html = renderUnits(); break;
     case 'mode': html = renderModeChoice(); break;
+    case 'wordlist': html = renderWordList(); break;
     case 'flashcard': html = renderFlashcard(); break;
     case 'quizSetup': html = renderQuizSetup(); break;
     case 'quizPlay': html = renderQuizPlay(); break;
@@ -606,6 +619,10 @@ function renderModeChoice(){
   return '<div class="screen active '+levelClass()+'">' +
     topbar(title, backTo) +
     '<div class="mode-choice">' +
+      '<div class="mode-card" data-goto="wordlist">' +
+        '<div class="micon">📋</div>' +
+        '<div><h4>單字列表</h4><p>一次瀏覽本單元所有單字，練習前先複習一遍</p></div>' +
+      '</div>' +
       '<div class="mode-card" data-goto="flashcard-start">' +
         '<div class="micon">🗂️</div>' +
         '<div><h4>翻卡練習</h4><p>逐字瀏覽單字、詞性、中文意思與發音</p></div>' +
@@ -615,6 +632,26 @@ function renderModeChoice(){
         '<div><h4>測驗模式</h4><p>拼字挑戰或選擇題，可自訂題數與限時</p></div>' +
       '</div>' +
     '</div>' +
+  '</div>';
+}
+
+/* ---------- 單字列表 ---------- */
+function renderWordList(){
+  var title = (state.poolSource==='review' ? '錯題複習' : (LEVEL_META[state.level].label+' Unit '+state.unit))+'・單字列表';
+  var backTo = 'mode';
+  var rows = state.pool.map(function(w, i){
+    return '<div class="wl-row">' +
+      '<div class="wl-idx">'+(i+1)+'</div>' +
+      '<div class="wl-main">' +
+        '<div class="wl-word-row"><span class="wl-word">'+esc(w.word)+'</span><span class="wl-pos">'+esc(w.pos)+'</span></div>' +
+        '<div class="wl-cn">'+esc(w.cn)+'</div>' +
+      '</div>' +
+      '<button class="speaker-btn wl-speak" data-speak="'+esc(w.word)+'">🔊</button>' +
+    '</div>';
+  }).join('');
+  return '<div class="screen active '+levelClass()+'">' +
+    topbar(title, backTo) +
+    '<div class="wl-list">'+rows+'</div>' +
   '</div>';
 }
 
@@ -889,6 +926,8 @@ function bindUnits(){
 }
 
 function bindModeChoice(){
+  var wl = appEl.querySelector('[data-goto="wordlist"]');
+  if(wl) wl.addEventListener('click', function(){ go('wordlist'); });
   var fc = appEl.querySelector('[data-goto="flashcard-start"]');
   if(fc) fc.addEventListener('click', function(){
     state.fcIndex = 0; state.fcFlipped = false;
