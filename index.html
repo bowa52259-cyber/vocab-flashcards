@@ -246,9 +246,10 @@ input:checked + .slider-toggle:before{transform:translateX(20px);}
 .q-speaker-row{display:flex;justify-content:center;margin-bottom:16px;}
 
 .blanks-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:18px 0;}
+.blanks-row.blanks-row-type{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:2px 4px 10px;-webkit-overflow-scrolling:touch;}
 .cell{
   min-width:30px;height:42px;border-bottom:3px solid var(--ink-soft);display:flex;align-items:center;
-  justify-content:center;font-size:20px;font-weight:800;
+  justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;
 }
 .cell.fixed{color:var(--ink-soft);border-bottom-color:transparent;}
 .cell.sep{border-bottom:none;min-width:12px;color:var(--ink-soft);font-weight:400;}
@@ -781,7 +782,7 @@ function renderSpellQuestion(item, q){
     '<div class="q-meaning">'+esc(item.cn)+'</div>' +
     '<div class="q-speaker-row"><button class="speaker-btn-pill" data-speak="'+esc(item.word)+'">🔊 聽發音</button></div>' +
     renderFeedbackBanner(q.feedback, '正確拼法：'+esc(item.word)) +
-    '<div class="blanks-row">'+cellsHtml+'</div>' +
+    '<div class="blanks-row'+(isType?' blanks-row-type':'')+'">'+cellsHtml+'</div>' +
     (isType ? '' : ('<div class="tile-bank">'+bankHtml+'</div>')) +
     '<button class="clearbtn" id="clearSpell">清除重填</button>' +
   '</div>';
@@ -1137,7 +1138,7 @@ function checkSpelling(){
   recordAnswer(item, ok);
   q.feedback = { ok: ok, streak: q.streak };
   render();
-  setTimeout(nextQuestion, 1100);
+  setTimeout(nextQuestion, ok ? 1100 : 2400);
 }
 
 function recordAnswer(item, ok){
